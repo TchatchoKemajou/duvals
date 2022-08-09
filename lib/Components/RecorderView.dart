@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:duvalsx/Services/DuvalDatabase.dart';
@@ -32,7 +33,7 @@ class _RecorderViewState extends State<RecorderView> {
   String audioName = "";
   String audioContent = "";
   String audioDuration = "00:00";
-  var recoding;
+  Recording? recording;
   RecordingState _recordingState = RecordingState.unSet;
 
   // Recorder properties
@@ -70,6 +71,20 @@ class _RecorderViewState extends State<RecorderView> {
           const Divider(
             height: 2,
             color: Colors.grey,
+          ),
+          if(_recordingState == RecordingState.recording || _recordingState == RecordingState.pause)
+          Container(
+            margin: const EdgeInsets.only(top: 5, bottom: 5),
+            child: Center(
+              child: Text(
+                  recording!.duration.toString().split(".").first,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontFamily: 'PopBold'
+                ),
+              ),
+            ),
           ),
           InkWell(
             onTap: () async{
@@ -268,8 +283,23 @@ class _RecorderViewState extends State<RecorderView> {
 
   _startRecording() async {
     await audioRecorder.start();
+    var r = await audioRecorder.current(channel: 0);
     setState(() {
+      recording = r;
       _recordingState = RecordingState.recording;
+    });
+
+    const tick = Duration(milliseconds: 50);
+    Timer.periodic(tick, (Timer t) async {
+      if (_recordingState == RecordingStatus.Stopped) {
+        t.cancel();
+      }
+
+      var current = await audioRecorder.current(channel: 0);
+      // print(current.status);
+      setState(() {
+        recording = current;
+      });
     });
     // final r = await audioRecorder.current(channel: 0);
     // setState(() {
@@ -299,12 +329,12 @@ class _RecorderViewState extends State<RecorderView> {
   }
 
   _stopRecording() async {
-    var recoding = await audioRecorder.current(channel: 0);
+    var r = await audioRecorder.current(channel: 0);
     await audioRecorder.stop();
     setState(() {
       _recordingState = RecordingState.stopped;
     });
-    Duration? d = recoding?.duration;
+    Duration? d = r?.duration;
     await addNote(d.toString().split(".").first);
     if (kDebugMode) {
       print("duree ${d.toString().split(".").first}");

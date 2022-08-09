@@ -1,4 +1,5 @@
 
+import 'package:duvalsx/Models/Folder.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -10,6 +11,7 @@ class DuvalDatabase{
   final textType = 'TEXT NOT NULL';
   final boolType = 'BOOLEAN NOT NULL';
   final integerType = 'INTEGER NOT NULL';
+  final integerTypeNull = 'INTEGER';
 
   static Database? _database;
 
@@ -26,10 +28,17 @@ class DuvalDatabase{
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(path, version: 1, onCreate: _createDB, singleInstance: false);
   }
 
   Future _createDB(Database db, int version) async{
+        await db.execute('''
+        CREATE TABLE $tableFolders ( 
+      ${FolderFields.id} $idType,
+      ${FolderFields.name} $textType,
+      ${FolderFields.createAt} $textType
+      )
+        ''');
         await db.execute('''
         CREATE TABLE $tableNotes ( 
       ${NoteFields.id} $idType,
@@ -39,15 +48,37 @@ class DuvalDatabase{
       ${NoteFields.duration} $textType,
       ${NoteFields.isImportant} $boolType,
       ${NoteFields.isRead} $boolType,
+      ${NoteFields.folder} $integerTypeNull,
       ${NoteFields.createAt} $textType
       )
         ''');
+
   }
 
   Future<Note> create(Note note) async{
     final db = await instance.database;
     final id = await db.insert(tableNotes, note.toJson());
     return note.copy(id: id);
+  }
+
+  Future<Folder> createFolder(Folder folder) async{
+    final db = await instance.database;
+    final id = await db.insert(tableFolders, folder.toJson());
+    return folder.copy(id: id);
+  }
+
+  Future<List<Note>> readFolder(int id) async {
+    final db = await instance.database;
+
+    const orderBy = '${NoteFields.createAt} ASC';
+
+    final result = await db.query(
+        tableNotes,
+        where: '${NoteFields.folder} = ? AND ${NoteFields.type} = ?',
+        whereArgs: [id, NoteType.text.toString()],
+        orderBy: orderBy);
+
+    return result.map((json) => Note.fromJson(json)).toList();
   }
 
   Future<Note> readNote(int id) async {
@@ -81,6 +112,20 @@ class DuvalDatabase{
         orderBy: orderBy);
 
     return result.map((json) => Note.fromJson(json)).toList();
+  }
+
+  Future<List<Folder>> readAllFolder() async {
+    final db = await instance.database;
+
+    const orderBy = '${FolderFields.createAt} ASC';
+    // final result =
+    //     await db.rawQuery('SELECT * FROM $tableNotes ORDER BY $orderBy');
+
+    final result = await db.query(
+        tableFolders,
+        orderBy: orderBy);
+
+    return result.map((json) => Folder.fromJson(json)).toList();
   }
 
   Future<int> update(Note note) async {

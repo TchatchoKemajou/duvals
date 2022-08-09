@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inapp_notifications/flutter_inapp_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../Components/NoteListView.dart';
@@ -17,11 +18,15 @@ class NotePage extends StatefulWidget {
 class _NotePageState extends State<NotePage> {
   final RefreshController refreshController = RefreshController(initialRefresh: true);
   List<Note> notes = [];
+  List<Note> searchNotes = [];
+  bool isSearch = false;
+  bool isLoading = false;
   final searchController = TextEditingController();
   String currentLanguage = "Français";
   String language = "Français";
   String lang = "fr";
-  List<String> languages = ["Français", "Anglais", "Allemand", "Espagnol", "Swahili", "Chinois", "Russe", "Italien", "Afrikaans", "Japonais"];
+  List<String> languages = ["Français", "English", "Deutsch", "Español", "kiswahili", "中国人", "Italiano", "Русский", "Afrikaans", "日本"];
+ // List<String> languages = ["Français", "Anglais", "Allemand", "Espagnol", "Swahili", "Chinois", "Russe", "Italien", "Afrikaans", "Japonais"];
 
 
 
@@ -29,14 +34,35 @@ class _NotePageState extends State<NotePage> {
   @override
   void initState() {
     super.initState();
-   // refreshNotes();
+    refreshNotes();
   }
 
 
   @override
   void dispose() {
-    DuvalDatabase.instance.close();
+    //DuvalDatabase.instance.close();
     super.dispose();
+  }
+
+
+
+  notification() {
+    return InAppNotifications.show(
+        title: 'Welcome to InAppNotifications',
+        leading: const Icon(
+          Icons.fact_check,
+          color: Colors.green,
+          size: 50,
+        ),
+        ending: const Icon(
+          Icons.arrow_right_alt,
+          color: Colors.red,
+        ),
+        description:
+        'This is a very simple notification with leading and ending widget.',
+        onTap: () {
+          // Do whatever you need!
+        });
   }
 
   @override
@@ -46,14 +72,14 @@ class _NotePageState extends State<NotePage> {
       appBar: AppBar(
         backgroundColor: thirdcolor,
         title: const Text(
-          "Duvals",
+          "Notes",
           style: TextStyle(
             color: Colors.white,
             fontFamily: 'PopBold',
             fontSize: 18
           ),
         ),
-        elevation: 0.0,
+        elevation: 10.0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 5),
@@ -127,7 +153,9 @@ class _NotePageState extends State<NotePage> {
                 enablePullDown: false,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 5, right: 5),
-                  child: NoteListView(notes: notes,),
+                  child: isLoading == false ? NoteListView(notes: isSearch == false ? notes : searchNotes, refresh: refreshNotes(),) : const Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
               )
           ),
@@ -140,65 +168,51 @@ class _NotePageState extends State<NotePage> {
       padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 5),
       child: TextFormField(
         keyboardType: TextInputType.text,
-        onChanged: (e) {
-          // setState(() {
-          //   isSearch = true;
-          //   querySearch = e;
-          // });
-        },
-        onFieldSubmitted: (e) async{
-          // await getAllResult();
-          // isValidSearch = true;
-          // if(videosSearch.length  <= 0){
-          //   await videoprovider.postSearchRequest(querySearch);
-          // }
-          // FocusScope.of(context).requestFocus(FocusNode());
-        },
+        onChanged: searchFunction,
         controller: searchController,
         maxLines: 1,
         style: const TextStyle(
             color: Colors.white
         ),
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           hoverColor: Colors.white,
-          // suffixIcon: isSearch == true
-          //     ? InkWell(
-          //   child: Icon(Icons.close, color: secondcolor,),
-          //   onTap: (){
-          //     setState(() {
-          //       isValidSearch = false;
-          //       isSearch = false;
-          //       videosSearch.clear();
-          //       searchController.clear();
-          //     });
-          //     FocusScope.of(context).requestFocus(FocusNode());
-          //   },
-          // )
-          //     : SizedBox(),
+          suffixIcon: isSearch == true
+              ? InkWell(
+            child: const Icon(Icons.close, color: Colors.red,),
+            onTap: (){
+              setState(() {
+                isSearch = false;
+                searchNotes.clear();
+                searchController.clear();
+              });
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+          )
+              : const SizedBox(),
           hintText: 'recherche',
-          hintStyle: TextStyle(
+          hintStyle: const TextStyle(
             color: Colors.white,
           ),
-          focusedBorder: OutlineInputBorder(
+          focusedBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(25)),
               borderSide: BorderSide(
                   color: Colors.white
               )
           ),
-          enabledBorder: OutlineInputBorder(
+          enabledBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(25)),
               borderSide: BorderSide(
                   color: Colors.white
               )
           ),
           isDense: true,                      // Added this
-          contentPadding: EdgeInsets.all(10),
+          contentPadding: const EdgeInsets.all(10),
           //hintText: "login",
-          prefixIcon: Icon(
+          prefixIcon: const Icon(
             Icons.search,
             color: Colors.white,
           ),
-          border: OutlineInputBorder(
+          border: const OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(25)),
           ),
         ),
@@ -206,17 +220,32 @@ class _NotePageState extends State<NotePage> {
     );
   }
 
+  searchFunction(String query) {
+    setState(() {
+      if(query == ""){
+        isSearch = false;
+      }else{
+        isSearch = true;
+      }
+    });
+
+    setState(() {
+      searchNotes = notes.where((element) {
+        return element.noteTitle.toLowerCase().contains(query.toLowerCase());
+      }).toList();
+    });
+  }
 
   refreshNotes() async {
-    //setState(() => isLoading = true);
+    setState(() => isLoading = true);
 
-    final n = await DuvalDatabase.instance.readAllNotes(NoteType.audio.toString());
+    final n = await DuvalDatabase.instance.readAllNotes(NoteType.text.toString());
     //print(n);
     setState(() {
       notes.clear();
-      notes = n;
+      notes = n.reversed.toList();
     });
 
-    //setState(() => isLoading = false);
+    setState(() => isLoading = false);
   }
 }

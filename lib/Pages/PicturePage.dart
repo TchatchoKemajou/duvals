@@ -21,12 +21,12 @@ class _PicturePageState extends State<PicturePage>{
   XFile? imageFile;
   String? imagePath;
 
-  String scannedText = "";
+  String scannedText = "Capturer ou selectionner une image pour extraire le texte";
 
   @override
   void initState(){
     super.initState();
-    getLastExtract();
+    //getLastExtract();
   }
 
   @override
@@ -65,14 +65,14 @@ class _PicturePageState extends State<PicturePage>{
       appBar: AppBar(
         backgroundColor: thirdcolor,
         title: const Text(
-          "Duvals",
+          "Scanner",
           style: TextStyle(
               color: Colors.white,
               fontFamily: 'PopBold',
               fontSize: 18
           ),
         ),
-        elevation: 0.0,
+        elevation: 10.0,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,10 +139,11 @@ class _PicturePageState extends State<PicturePage>{
               padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
               child: SelectableText(
                 scannedText,
+                textAlign: imagePath != null ? TextAlign.center : TextAlign.left,
                 style: const TextStyle(
                     color: Colors.white,
                     fontFamily: 'PopBold',
-                    fontSize: 14
+                    fontSize: 14,
                 ),
               ),
             ),

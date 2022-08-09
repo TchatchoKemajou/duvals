@@ -5,7 +5,7 @@ const String tableNotes = 'notes';
 class NoteFields {
   static final List<String> values = [
     /// Add all fields
-    id, isRead, isImportant, title, content, type, duration, createAt
+    id, isRead, isImportant, title, content, type, duration, folder, createAt
   ];
 
   static const String id = 'id';
@@ -15,6 +15,7 @@ class NoteFields {
   static const String content = 'content';
   static const String type = 'type';
   static const String duration = 'duration';
+  static const String folder = 'folder';
   static const String createAt = 'createAt';
 }
 
@@ -32,6 +33,7 @@ class Note{
   final String noteDuration;
   final bool noteIsImportant;
   final bool noteIsRead;
+  final int? noteFolder;
   final DateTime noteCreateAt;
 
   const Note({
@@ -42,6 +44,7 @@ class Note{
     required this.noteDuration,
     required this.noteIsImportant,
     required this.noteIsRead,
+    this.noteFolder,
     required this.noteCreateAt
   });
 
@@ -53,6 +56,7 @@ class Note{
     String? duration,
     bool? isImportant,
     bool? isRead,
+    int? folder,
     DateTime? createAt,
   }) =>
       Note(
@@ -63,6 +67,7 @@ class Note{
         noteType: type ?? noteType,
         noteIsRead: isRead ?? noteIsRead,
         noteContent: content ?? noteContent,
+        noteFolder: folder ?? noteFolder,
         noteCreateAt: createAt ?? noteCreateAt,
       );
 
@@ -74,6 +79,7 @@ class Note{
     noteDuration: json["duration"] as String,
     noteIsImportant: json["isImportant"] == 1,
     noteIsRead: json["isRead"] == 1,
+    noteFolder: json["folder"],
     noteCreateAt: DateTime.parse(json["createAt"] as String)
   );
 
@@ -86,6 +92,7 @@ class Note{
       "duration": noteDuration,
       "isImportant": noteIsImportant ? 1 : 0,
       "isRead": noteIsRead ? 1 : 0,
+      "folder": noteFolder,
       "createAt": noteCreateAt.toIso8601String()
     };
   }

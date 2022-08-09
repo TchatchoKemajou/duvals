@@ -3,13 +3,12 @@ import 'package:duvalsx/Services/CacheService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'Components/recorder_home_view.dart';
 import 'Constants.dart';
 import 'Providers/PictureProvider.dart';
 import 'generated/l10n.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Providers/LanguageChangeProvider.dart';
-import 'package:skeletons/skeletons.dart';
+
 
 Future<void> main() async{
   Provider.debugCheckInvalidValueType = null;
@@ -39,57 +38,18 @@ class MyApp extends StatelessWidget {
         builder: (context) =>
             Consumer<LanguageChangeProvider>(
                 builder: (context, value, child){
-                  return SkeletonTheme(
-                    //duration: Duration(milliseconds: 1500),
-                    // themeMode: ThemeMode.light,
-                    shimmerGradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF222222),
-                        Color(0xFF242424),
-                        Colors.black12,
-                        Color(0xFF242424),
-                        Color(0xFF222222),
-                      ],
-                      stops: [
-                        0.0,
-                        0.2,
-                        0.5,
-                        0.8,
-                        1,
-                      ],
-                    ),
-                    darkShimmerGradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF222222),
-                        Color(0xFF242424),
-                        Color(0xFF2B2B2B),
-                        Color(0xFF242424),
-                        Color(0xFF222222),
-                      ],
-                      stops: [
-                        0.0,
-                        0.2,
-                        0.5,
-                        0.8,
-                        1,
-                      ],
-                      begin: Alignment(-1, 0),
-                      end: Alignment(1, 0),
-                      tileMode: TileMode.mirror,
-                    ),
-                    child: MaterialApp(
-                      locale: Provider.of<LanguageChangeProvider>(context, listen: true).currentLocale,
-                      localizationsDelegates: const [
-                        S.delegate,
-                        GlobalMaterialLocalizations.delegate,
-                        GlobalWidgetsLocalizations.delegate,
-                        GlobalCupertinoLocalizations.delegate,
-                      ],
-                      supportedLocales: S.delegate.supportedLocales,
-                      debugShowCheckedModeBanner: false,
-                      // home: value.doneLoading == true ? Login(): SplashScreen(context: context,),
-                      home: SplashScreen(context: context,),
-                    ),
+                  return MaterialApp(
+                    locale: Provider.of<LanguageChangeProvider>(context, listen: true).currentLocale,
+                    localizationsDelegates: const [
+                      S.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    supportedLocales: S.delegate.supportedLocales,
+                    debugShowCheckedModeBanner: false,
+                    // home: value.doneLoading == true ? Login(): SplashScreen(context: context,),
+                    home: SplashScreen(context: context,),
                   );
                 }
             ),

@@ -8,6 +8,7 @@ import 'package:duvalsx/Pages/VoicePage.dart';
 import 'package:flutter/material.dart';
 
 import 'Constants.dart';
+import 'Services/DuvalDatabase.dart';
 
 class HomePages extends StatefulWidget {
   const HomePages({Key? key}) : super(key: key);
@@ -30,6 +31,13 @@ class _HomePagesState extends State<HomePages> {
       NotePage()
     ];
     super.initState();
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    DuvalDatabase.instance.close();
   }
 
   @override

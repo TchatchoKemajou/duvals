@@ -1,9 +1,11 @@
 import 'package:duvalsx/Services/TextToSpeechService.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:translator/translator.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../Constants.dart';
+import '../Providers/LanguageChangeProvider.dart';
 
 class TranslatePage extends StatefulWidget {
   const TranslatePage({Key? key}) : super(key: key);
@@ -14,10 +16,15 @@ class TranslatePage extends StatefulWidget {
 
 class _TranslatePageState extends State<TranslatePage> {
   TextToSpeechService textToSpeechService = TextToSpeechService();
+  final translateController = TextEditingController();
+  final translator = GoogleTranslator();
   bool isSpeaking = false;
-  String sourceLanguage = "Anglais";
+  String sourceLanguage = "English";
   String targetLanguage = "Français";
-  List<String> languages = ["Français", "Anglais", "Allemand", "Espagnol", "Swahili", "Chinois", "Russe", "Italien", "Afrikaans", "Japonais"];
+  String localSource = "en";
+  String localTarget = "fr";
+  List<String> languagesSource = ["Français", "English", "Deutsch", "Español", "kiswahili", "中国人", "Italien", "Русский", "Afrikaans", "日本"];
+  List<String> languagesTarget = ["Français", "English", "Deutsch", "Español", "kiswahili", "中国人", "Italien", "Русский", "Afrikaans", "日本"];
   String translateText = "Traduction";
 
 
@@ -28,6 +35,19 @@ class _TranslatePageState extends State<TranslatePage> {
       isSpeaking = textToSpeechService.initializeTTS();
     });
   }
+
+  // loadLanguage() {
+  //   final languageProvider = Provider.of<LanguageChangeProvider>(context, listen: false);
+  //   String l = languageProvider.currentLocale.toString();
+  //   setState(() {
+  //     language = languageProvider.currentLocaleName;
+  //     if(language == "All"){
+  //       lang = "all";
+  //     }else{
+  //       lang = l;
+  //     }
+  //   });
+  // }
 
 
   @override
@@ -43,7 +63,7 @@ class _TranslatePageState extends State<TranslatePage> {
       appBar: AppBar(
         backgroundColor: thirdcolor,
         title: const Text(
-          "Duvals",
+          "Traduction",
           style: TextStyle(
               color: Colors.white,
               fontFamily: 'PopBold',
@@ -65,7 +85,7 @@ class _TranslatePageState extends State<TranslatePage> {
             ),
           ),
         ],
-        elevation: 0.0,
+        elevation: 10.0,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,25 +132,79 @@ class _TranslatePageState extends State<TranslatePage> {
                         setState(() {
                           sourceLanguage = e!;
                         });
-                        // switch (e!) {
-                        //   case "Allemand":
-                        //     value.changeLocale("fr", "Allemand");
-                        //     //await videosProviders.allMovies(1);
-                        //     break;
-                        //
-                        //   case "Français":
-                        //     value.changeLocale("fr", "Français");
-                        //     //await videosProviders.allMovies(1);
-                        //     break;
-                        //
-                        //   case "Anglais":
-                        //     value.changeLocale("en", "Anglais");
-                        //     break;
-                        // }
-                        //loadLanguage();
-                        //findAllVideos(lang);
+                        switch (e!) {
+                          case "Deutsch":
+                            setState(() {
+                              localSource = "de";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Français":
+                            setState(() {
+                              localSource = "fr";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "English":
+                            setState(() {
+                              localSource = "en";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Español":
+                            setState(() {
+                              localSource = "es";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "kiswahili":
+                            setState(() {
+                              localSource = "sw";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Русский":
+                            setState(() {
+                              localSource = "ru";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "中国人":
+                            setState(() {
+                              localSource = "zh";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Italien":
+                            setState(() {
+                              localSource = "it";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Afrikaans":
+                            setState(() {
+                              localSource = "af";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "日本":
+                            setState(() {
+                              localSource = "ja";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+                        }
                       },
-                      items: languages
+                      items: languagesSource
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -142,7 +216,17 @@ class _TranslatePageState extends State<TranslatePage> {
                 ),
                 IconButton(
                     onPressed: (){
+                      String temp1 = localSource;
+                      String temp2 = sourceLanguage;
 
+                      setState(() {
+                        localSource = localTarget;
+                        localTarget = temp1;
+                        sourceLanguage = targetLanguage;
+                        targetLanguage = temp2;
+                        translateController.text = translateText;
+                      });
+                      translateFunction(sourceLanguage);
                     },
                     icon: const Icon(Icons.compare_arrows, color: secondcolor, size: 24,)
                 ),
@@ -183,25 +267,79 @@ class _TranslatePageState extends State<TranslatePage> {
                         setState(() {
                           targetLanguage = e!;
                         });
-                        // switch (e!) {
-                        //   case "Allemand":
-                        //     value.changeLocale("fr", "Allemand");
-                        //     //await videosProviders.allMovies(1);
-                        //     break;
-                        //
-                        //   case "Français":
-                        //     value.changeLocale("fr", "Français");
-                        //     //await videosProviders.allMovies(1);
-                        //     break;
-                        //
-                        //   case "Anglais":
-                        //     value.changeLocale("en", "Anglais");
-                        //     break;
-                        // }
-                        //loadLanguage();
-                        //findAllVideos(lang);
+                        switch (e!) {
+                          case "Deutsch":
+                            setState(() {
+                              localTarget = "de";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Français":
+                            setState(() {
+                              localTarget = "fr";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "English":
+                            setState(() {
+                              localTarget = "en";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Español":
+                            setState(() {
+                              localTarget = "es";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "kiswahili":
+                            setState(() {
+                              localTarget = "sw";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Русский":
+                            setState(() {
+                              localTarget = "ru";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "中国人":
+                            setState(() {
+                              localTarget = "zh";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Italien":
+                            setState(() {
+                              localTarget = "it";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "Afrikaans":
+                            setState(() {
+                              localTarget = "af";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+
+                          case "日本":
+                            setState(() {
+                              localTarget = "ja";
+                            });
+                            translateFunction(translateController.text);
+                            break;
+                        }
                       },
-                      items: languages
+                      items: languagesTarget
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -218,12 +356,8 @@ class _TranslatePageState extends State<TranslatePage> {
             child: Container(
               color: thirdcolor,
               child: TextFormField(
-                onChanged: (source) async{
-                  var t = await source.translate(to: "en");
-                  setState((){
-                    translateText = t.text;
-                  });
-                },
+                onChanged: translateFunction,
+                controller: translateController,
                 maxLines: null,
                 style: const TextStyle(
                   fontFamily: 'PopBold',
@@ -274,5 +408,13 @@ class _TranslatePageState extends State<TranslatePage> {
         ],
       ),
     );
+  }
+
+  translateFunction(String source) {
+    translator.translate(source, from: localSource, to: localTarget).then((s) {
+      setState(() {
+        translateText = s.text;
+      });
+    });
   }
 }
